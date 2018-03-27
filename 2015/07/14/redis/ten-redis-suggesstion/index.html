@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>10 个 Redis 建议/技巧 | Abners</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本文由伯乐在线jasper 校稿，翻译自 objectrocket.com   Redis 在当前的技术社区里是非常热门的。从来自 Antirez 一个小小的个人项目到成为内存数据存储行业的标准，Redis已经走过了很长的一段路。随之而来的一系列最佳实践，使得大多数人可以正确地使用 Redis。下面我们将探索正确使用 Redis 的10个技巧。">
+<meta name="keywords" content="redis,缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="10 个 Redis 建议&#x2F;技巧">
+<meta property="og:url" content="http://blog.abners.wang/2015/07/14/redis/ten-redis-suggesstion/index.html">
+<meta property="og:site_name" content="Abners">
+<meta property="og:description" content="本文由伯乐在线jasper 校稿，翻译自 objectrocket.com   Redis 在当前的技术社区里是非常热门的。从来自 Antirez 一个小小的个人项目到成为内存数据存储行业的标准，Redis已经走过了很长的一段路。随之而来的一系列最佳实践，使得大多数人可以正确地使用 Redis。下面我们将探索正确使用 Redis 的10个技巧。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-15T09:18:02.746Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="10 个 Redis 建议&#x2F;技巧">
+<meta name="twitter:description" content="本文由伯乐在线jasper 校稿，翻译自 objectrocket.com   Redis 在当前的技术社区里是非常热门的。从来自 Antirez 一个小小的个人项目到成为内存数据存储行业的标准，Redis已经走过了很长的一段路。随之而来的一系列最佳实践，使得大多数人可以正确地使用 Redis。下面我们将探索正确使用 Redis 的10个技巧。">
+  
+    <link rel="alternative" href="/atom.xml" title="Abners" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Abners</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术共享</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.abners.wang">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-redis/ten-redis-suggesstion" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/07/14/redis/ten-redis-suggesstion/" class="article-date">
+  <time datetime="2015-07-14T07:58:00.000Z" itemprop="datePublished">2015-07-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术翻译/">技术翻译</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      10 个 Redis 建议/技巧
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文由伯乐在线<a href="http://www.jobbole.com/members/jasper/" target="_blank" rel="noopener">jasper</a> 校稿，翻译自 <a href="http://objectrocket.com/blog/how-to/10-quick-tips-about-redis/" target="_blank" rel="noopener">objectrocket.com </a> </p>
+<p>Redis 在当前的技术社区里是非常热门的。从来自 Antirez 一个小小的个人项目到成为内存数据存储行业的标准，Redis已经走过了很长的一段路。随之而来的一系列最佳实践，使得大多数人可以正确地使用 Redis。下面我们将探索正确使用 Redis 的10个技巧。</p>
+<a id="more"></a>
+<h4 id="1、停止使用-KEYS"><a href="#1、停止使用-KEYS" class="headerlink" title="1、停止使用 KEYS *"></a>1、停止使用 KEYS *</h4><p>Okay，以挑战这个命令开始这篇文章，或许并不是一个好的方式，但其确实可能是最重要的一点。很多时候当我们关注一个redis实例的统计数据，我们会快速地输入”KEYS *”命令，这样key的信息会很明显地展示出来。平心而论，从程序化的角度出发往往倾向于写出下面这样的伪代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for key in&apos;keys *&apos;:</span><br><span class="line"> </span><br><span class="line">doAllTheThings()</span><br></pre></td></tr></table></figure></p>
+<p>但是当你有1300万个key时，执行速度将会变慢。因为KEYS命令的时间复杂度是O(n)，其中n是要返回的keys的个数，这样这个命令的复杂度就取决于数据库的大小了。并且在这个操作执行期间，其它任何命令在你的实例中都无法执行。</p>
+<p>作为一个替代命令，看一下 SCAN 吧，其允许你以一种更友好的方式来执行… SCAN 通过增量迭代的方式来扫描数据库。这一操作基于游标的迭代器来完成的，因此只要你觉得合适，你可以随时停止或继续。</p>
+<h4 id="2、找出拖慢-Redis-的罪魁祸首"><a href="#2、找出拖慢-Redis-的罪魁祸首" class="headerlink" title="2、找出拖慢 Redis 的罪魁祸首"></a>2、找出拖慢 Redis 的罪魁祸首</h4><p>由于 Redis 没有非常详细的日志，要想知道在 Redis 实例内部都做了些什么是非常困难的。幸运的是 Redis 提供了一个下面这样的命令统计工具：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; INFO commandstats</span><br><span class="line"># Commandstats</span><br><span class="line">cmdstat_get:calls=78,usec=608,usec_per_call=7.79</span><br><span class="line">cmdstat_setex:calls=5,usec=71,usec_per_call=14.20</span><br><span class="line">cmdstat_keys:calls=2,usec=42,usec_per_call=21.00</span><br><span class="line">cmdstat_info:calls=10,usec=1931,usec_per_call=193.10</span><br></pre></td></tr></table></figure>
+<p>通过这个工具可以查看所有命令统计的快照，比如命令执行了多少次，执行命令所耗费的毫秒数(每个命令的总时间和平均时间)</p>
+<p>只需要简单地执行 CONFIG RESETSTAT 命令就可以重置，这样你就可以得到一个全新的统计结果。</p>
+<h3 id="3、将-Redis-Benchmark-结果作为参考，而不要一概而论"><a href="#3、将-Redis-Benchmark-结果作为参考，而不要一概而论" class="headerlink" title="3、将 Redis-Benchmark 结果作为参考，而不要一概而论"></a>3、将 Redis-Benchmark 结果作为参考，而不要一概而论</h3><p>Redis 之父 Salvatore 就说过：“通过执行GET/SET命令来测试Redis就像在雨天检测法拉利的雨刷清洁镜子的效果”。很多时候人们跑到我这里，他们想知道为什么自己的Redis-Benchmark统计的结果低于最优结果 。但我们必须要把各种不同的真实情况考虑进来，例如：</p>
+<ul>
+<li>可能受到哪些客户端运行环境的限制？</li>
+<li>是同一个版本号吗？</li>
+<li>测试环境中的表现与应用将要运行的环境是否一致？</li>
+</ul>
+<p>Redis-Benchmark的测试结果提供了一个保证你的 Redis-Server 不会运行在非正常状态下的基准点，但是你永远不要把它作为一个真实的“压力测试”。压力测试需要反应出应用的运行方式，并且需要一个尽可能的和生产相似的环境。</p>
+<h4 id="4、Hashes-是你的最佳选择"><a href="#4、Hashes-是你的最佳选择" class="headerlink" title="4、Hashes 是你的最佳选择"></a>4、Hashes 是你的最佳选择</h4><p>以一种优雅的方式引入 hashes 吧。hashes 将会带给你一种前所未有的体验。之前我曾看到过许多类似于下面这样的key结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">foo:first_name</span><br><span class="line">foo:last_name</span><br><span class="line">foo:address</span><br></pre></td></tr></table></figure></p>
+<p>上面的例子中，foo 可能是一个用户的用户名，其中的每一项都是一个单独的 key。这就增加了 犯错的空间，和一些不必要的 key。使用 hash 代替吧，你会惊奇地发现竟然只需要一个 key ：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; HSET foo first_name &quot;Joe&quot;(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; HSET foo last_name &quot;Engel&quot;(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; HSET foo address &quot;1 Fanatical Pl&quot;(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; HGETALL foo</span><br><span class="line">1)&quot;first_name&quot;</span><br><span class="line">2)&quot;Joe&quot;</span><br><span class="line">3)&quot;last_name&quot;</span><br><span class="line">4)&quot;Engel&quot;</span><br><span class="line">5)&quot;address&quot;</span><br><span class="line">6)&quot;1 Fanatical Pl&quot;</span><br><span class="line">127.0.0.1:6379&gt; HGET foo first_name</span><br><span class="line">&quot;Joe&quot;</span><br></pre></td></tr></table></figure></p>
+<h4 id="5、设置-key-值的存活时间"><a href="#5、设置-key-值的存活时间" class="headerlink" title="5、设置 key 值的存活时间"></a>5、设置 key 值的存活时间</h4><p>无论什么时候，只要有可能就利用key超时的优势。一个很好的例子就是储存一些诸如临时认证key之类的东西。当你去查找一个授权key时——以OAUTH为例——通常会得到一个超时时间。这样在设置key的时候，设成同样的超时时间，Redis就会自动为你清除！而不再需要使用KEYS *来遍历所有的key了，怎么样很方便吧？</p>
+<h4 id="6、选择合适的回收策略"><a href="#6、选择合适的回收策略" class="headerlink" title="6、选择合适的回收策略"></a>6、选择合适的回收策略</h4><p>既然谈到了清除key这个话题，那我们就来聊聊回收策略。当 Redis 的实例空间被填满了之后，将会尝试回收一部分key。根据你的使用方式，我强烈建议使用 volatile-lru 策略——前提是你对key已经设置了超时。但如果你运行的是一些类似于 cache 的东西，并且没有对 key 设置超时机制，可以考虑使用 allkeys-lru 回收机制。我的建议是先在这里查看一下可行的方案。</p>
+<h4 id="7、如果你的数据很重要，请使用-Try-Except"><a href="#7、如果你的数据很重要，请使用-Try-Except" class="headerlink" title="7、如果你的数据很重要，请使用 Try/Except"></a>7、如果你的数据很重要，请使用 Try/Except</h4><p>如果必须确保关键性的数据可以被放入到 Redis 的实例中，我强烈建议将其放入 try/except 块中。几乎所有的Redis客户端采用的都是“发送即忘”策略，因此经常需要考虑一个 key 是否真正被放到 Redis 数据库中了。至于将 try/expect 放到 Redis 命令中的复杂性并不是本文要讲的，你只需要知道这样做可以确保重要的数据放到该放的地方就可以了。</p>
+<h4 id="8、不要耗尽一个实例"><a href="#8、不要耗尽一个实例" class="headerlink" title="8、不要耗尽一个实例"></a>8、不要耗尽一个实例</h4><p>无论什么时候，只要有可能就分散多redis实例的工作量。从3.0.0版本开始，Redis就支持集群了。Redis集群允许你基于key范围分离出部分包含主/从模式的key。完整的集群背后的“魔法”可以在这里找到。但如果你是在找教程，那这里是一个再适合不过的地方了。如果不能选择集群，考虑一下命名空间吧，然后将你的key分散到多个实例之中。关于怎样分配数据，在redis.io网站上有这篇精彩的评论。</p>
+<h4 id="9、内核越多越好吗？！"><a href="#9、内核越多越好吗？！" class="headerlink" title="9、内核越多越好吗？！"></a>9、内核越多越好吗？！</h4><p>当然是错的。Redis 是一个单线程进程，即使启用了持久化最多也只会消耗两个内核。除非你计划在一台主机上运行多个实例——希望只会是在开发测试的环境下！——否则的话对于一个 Redis 实例是不需要2个以上内核的。</p>
+<h4 id="10、高可用"><a href="#10、高可用" class="headerlink" title="10、高可用"></a>10、高可用</h4><p>到目前为止 Redis Sentinel 已经经过了很全面的测试，很多用户已经将其应用到了生产环境中（包括 ObjectRocket ）。如果你的应用重度依赖于 Redis ，那就需要想出一个高可用方案来保证其不会掉线。当然，如果不想自己管理这些东西，ObjectRocket 提供了一个高可用平台，并提供7×24小时的技术支持，有意向的话可以考虑一下。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.abners.wang/2015/07/14/redis/ten-redis-suggesstion/" data-id="cjf9cqoph001l0yfyx8ydqj8u" class="article-share-link" data-share="baidu" data-title="10 个 Redis 建议/技巧">Share</a>
+      
+
+      
+        <a href="http://blog.abners.wang/2015/07/14/redis/ten-redis-suggesstion/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/缓存/">缓存</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/10/28/html-special-tags/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          HTML特殊符号对照表
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/03/31/java/java锁性能改善/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">改善Java中锁的性能</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2015/07/14/redis/ten-redis-suggesstion/" data-title="10 个 Redis 建议/技巧" data-url="http://blog.abners.wang/2015/07/14/redis/ten-redis-suggesstion/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/原创/">原创</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工作/">工作</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术日志/">技术日志</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术翻译/">技术翻译</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/转载/">转载</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDE/">IDE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/">html</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java7/">java7</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/list/">list</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/">mongodb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多线程/">多线程</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/容器/">容器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工作/">工作</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/总结/">总结</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/类加载机制/">类加载机制</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/IDE/" style="font-size: 10px;">IDE</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/idea/" style="font-size: 10px;">idea</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/java7/" style="font-size: 10px;">java7</a> <a href="/tags/list/" style="font-size: 10px;">list</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/多线程/" style="font-size: 13.33px;">多线程</a> <a href="/tags/容器/" style="font-size: 10px;">容器</a> <a href="/tags/工作/" style="font-size: 10px;">工作</a> <a href="/tags/总结/" style="font-size: 10px;">总结</a> <a href="/tags/数据库/" style="font-size: 16.67px;">数据库</a> <a href="/tags/正则表达式/" style="font-size: 10px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/类加载机制/" style="font-size: 13.33px;">类加载机制</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/12/08/database/mysql/mysql索引原理/">mysql 索引原理及添加索引的原理</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/19/database/mongodb/mongodbid/">mongodb文档id生成策略</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/14/ide/idea使用小结/">idea使用小结</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/11/algorithm/NthDigit/">正整数序列求第n个数字</a>
+          </li>
+        
+          <li>
+            <a href="/2016/07/02/interview/面试总结/">面试杂谈</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Links</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://arvinxiang.com" target="_blank">主题作者</a>
+          </li>
+        
+          <li>
+            <a href="http://reqianduan.com" target="_blank">热前端</a>
+          </li>
+        
+          <li>
+            <a href="http://yuancheng.work" target="_blank">远程.work</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 abners<br>
+      Powered by <a href="//hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="totop"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"reqianduan"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

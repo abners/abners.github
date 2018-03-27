@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>idea使用小结 | Abners</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="由 Eclipse 党转为 IDEA 党有几个月了，今天正好空闲，记录一下使用心得。">
+<meta name="keywords" content="IDE,idea">
+<meta property="og:type" content="article">
+<meta property="og:title" content="idea使用小结">
+<meta property="og:url" content="http://blog.abners.wang/2016/12/14/ide/idea使用小结/index.html">
+<meta property="og:site_name" content="Abners">
+<meta property="og:description" content="由 Eclipse 党转为 IDEA 党有几个月了，今天正好空闲，记录一下使用心得。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-16T06:21:13.386Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="idea使用小结">
+<meta name="twitter:description" content="由 Eclipse 党转为 IDEA 党有几个月了，今天正好空闲，记录一下使用心得。">
+  
+    <link rel="alternative" href="/atom.xml" title="Abners" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Abners</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术共享</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.abners.wang">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-ide/idea使用小结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/14/ide/idea使用小结/" class="article-date">
+  <time datetime="2016-12-13T16:00:00.000Z" itemprop="datePublished">2016-12-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/原创/">原创</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      idea使用小结
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>由 Eclipse 党转为 IDEA 党有几个月了，今天正好空闲，记录一下使用心得。</p>
+<a id="more"></a>
+<p> 其实 IDEA 很久之前就听说过了，当时还下载试用了一下，当时好像由于使用习惯的问题，放弃了，具体原因记不太清了。说起转向 IDEA 的原因感觉也挺滑稽的，那个时候刚到公司没几天，刚到公司大家肯定也都知道，基本是没有什么事情做的，就是 CHECK  代码，熟悉业务之类的。在这之前有朋友已经切换到了 IDEA 进行开发，说 IDEA 开发如何如何爽，如何如何智能。本来 Eclipse 用的挺好的，也就没打算去换 IDE ，并且更换 IDE 的成本还是挺大的，需要重新 CHECK 代码，重新配置环境，转换操作习惯等，除此之外还有一些潜在的风险，比如一旦有一个正在使用的工具不兼容新的 IDE 一切就都前功尽弃了，当然我上面说的都是用公司的电脑折腾，自己在家里玩玩的可以无视。</p>
+<p> 就在认为一切准备就绪，准备投入新公司的战斗任务中，这个时候一件意想不到的事情发生了，那天早上天气貌似不好，可能预示着有不好的事情要发生吧，一切就像往常一样，熟练的打开电脑，打开  Eclipse ，更新代码，重新编译，咔嚓！就是这个编译，突然就报错了，有一个依赖的 JAR 包怎么也下载不下来，只要编译到那块就报错，检查网络，检查 Maven 仓库，各种搞了半个小时，但是就是没用。心一横，此时不换更待何时。然后，就像童话故事里讲的一样王子和公主从此过上了幸福快乐的日子，我和IDEA并肩作战，从此开始了新的旅程。</p>
+<p> 扯淡完毕，下面进入正题，IDEA目前主要分为两个版本：社区版和付费版。社区版是免费的，当然在功能上就会不全面。土豪随意。如果初次接触IDEA，建议先使用社区版试水一下，感觉适合自己，再考虑付费版的，不过目前的付费版网上有很多激活码，激活服务器貌似最近被封杀了。</p>
+<p> 下面就从我以往的使用体验上分析一下，从以下几个方面对比一下Eclipse和IDEA</p>
+<ol>
+<li>启动速度，IDEA基本上是秒杀Eclipse，Eclipse作为一个老牌的IDE,感觉越做越重，包含的功能越来越多，有很多功能其实开发者基本不会用到。</li>
+<li>插件支持，在这一点上，Eclipse已经进入市场很多年，插件市场还是相当丰富的，有很多对开发者非常有用的功能。以 SVN 插件来讲，我觉得Eclipse做的还是相当好的，创建分支，合并、更新、提交代码使用起来如行云流水般，一气呵成。IDEA在这方面就稍逊一筹了，其实IDEA的SVN用了这么长时间了，我还不知道怎么创建分支，每次想要新建分支还是得用小乌龟。</li>
+<li>智能提示，IDEA本身就是以智慧著称，自动检查代码，发现与预置规范有出入的代码给出提示，若程序员同意修改自动完成修改。例如代码：String str = “Hello Intellij “ + “IDEA”; IDEA将给出优化提示，若程序员同意修改IDEA将自动将代码修改为：String str = “Hello Intellij IDEA”。当然除此之外还有很多比较智能地方，比如智能编辑，智能模板等。自己使用的过程中可以慢慢体会。</li>
+<li>IDEA还有一个很强大的功能就是历史记录，比如我们对一个类文件反复修改保存了10次，最后发现之前的某一次修改才是比较好的，这个时候这个功能就派上用场了，通过快捷键打开历史记录面板就可以很轻松的恢复之前的记录，当然Eclipse貌似也有这种功能，之前没怎么用过，不做评价。</li>
+<li>IDEA确实很强大，但伴随而来的必然是对内存的消耗，因为很多功能需要在内存实时计算，比如智能代码提示。</li>
+</ol>
+<p>以上说的都是我自己在使用过程中的一些体会，只是对经常使用的功能做了一些对比，IDEA本身还有很多功能，比如模板功能、丰富的导航模式等。希望可以给想要使用IDEA的小伙伴一些参考。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.abners.wang/2016/12/14/ide/idea使用小结/" data-id="cjf9cqooq000v0yfyojip5bs2" class="article-share-link" data-share="baidu" data-title="idea使用小结">Share</a>
+      
+
+      
+        <a href="http://blog.abners.wang/2016/12/14/ide/idea使用小结/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IDE/">IDE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/idea/">idea</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/19/database/mongodb/mongodbid/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          mongodb文档id生成策略
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/12/11/algorithm/NthDigit/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">正整数序列求第n个数字</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2016/12/14/ide/idea使用小结/" data-title="idea使用小结" data-url="http://blog.abners.wang/2016/12/14/ide/idea使用小结/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/原创/">原创</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工作/">工作</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术日志/">技术日志</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术翻译/">技术翻译</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/转载/">转载</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDE/">IDE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/">html</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java7/">java7</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/list/">list</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/">mongodb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多线程/">多线程</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/容器/">容器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工作/">工作</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/总结/">总结</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/类加载机制/">类加载机制</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/IDE/" style="font-size: 10px;">IDE</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/idea/" style="font-size: 10px;">idea</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/java7/" style="font-size: 10px;">java7</a> <a href="/tags/list/" style="font-size: 10px;">list</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/多线程/" style="font-size: 13.33px;">多线程</a> <a href="/tags/容器/" style="font-size: 10px;">容器</a> <a href="/tags/工作/" style="font-size: 10px;">工作</a> <a href="/tags/总结/" style="font-size: 10px;">总结</a> <a href="/tags/数据库/" style="font-size: 16.67px;">数据库</a> <a href="/tags/正则表达式/" style="font-size: 10px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/类加载机制/" style="font-size: 13.33px;">类加载机制</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/12/08/database/mysql/mysql索引原理/">mysql 索引原理及添加索引的原理</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/19/database/mongodb/mongodbid/">mongodb文档id生成策略</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/14/ide/idea使用小结/">idea使用小结</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/11/algorithm/NthDigit/">正整数序列求第n个数字</a>
+          </li>
+        
+          <li>
+            <a href="/2016/07/02/interview/面试总结/">面试杂谈</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Links</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://arvinxiang.com" target="_blank">主题作者</a>
+          </li>
+        
+          <li>
+            <a href="http://reqianduan.com" target="_blank">热前端</a>
+          </li>
+        
+          <li>
+            <a href="http://yuancheng.work" target="_blank">远程.work</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 abners<br>
+      Powered by <a href="//hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="totop"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"reqianduan"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

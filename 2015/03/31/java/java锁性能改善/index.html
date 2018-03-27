@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>改善Java中锁的性能 | Abners</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本文由伯乐在线唐尤华 校稿，翻译自  www.javacodegeeks.com  两个月前向Plumbr公司引进线程死锁的检测之后，我们开始收到一些类似于这样的询问：“棒极了！现在我知道造成程序出现性能问题的原因了，但是接下来该怎么做呢？” 我们努力为自己的产品所遇到的问题思考解决办法，但在这篇文章中我将给大家分享几种常用的技术，包括分离锁、并行数据结构、保护数据而非代码、缩小锁的作用范围，这几">
+<meta name="keywords" content="java,多线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="改善Java中锁的性能">
+<meta property="og:url" content="http://blog.abners.wang/2015/03/31/java/java锁性能改善/index.html">
+<meta property="og:site_name" content="Abners">
+<meta property="og:description" content="本文由伯乐在线唐尤华 校稿，翻译自  www.javacodegeeks.com  两个月前向Plumbr公司引进线程死锁的检测之后，我们开始收到一些类似于这样的询问：“棒极了！现在我知道造成程序出现性能问题的原因了，但是接下来该怎么做呢？” 我们努力为自己的产品所遇到的问题思考解决办法，但在这篇文章中我将给大家分享几种常用的技术，包括分离锁、并行数据结构、保护数据而非代码、缩小锁的作用范围，这几">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-15T09:18:02.745Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="改善Java中锁的性能">
+<meta name="twitter:description" content="本文由伯乐在线唐尤华 校稿，翻译自  www.javacodegeeks.com  两个月前向Plumbr公司引进线程死锁的检测之后，我们开始收到一些类似于这样的询问：“棒极了！现在我知道造成程序出现性能问题的原因了，但是接下来该怎么做呢？” 我们努力为自己的产品所遇到的问题思考解决办法，但在这篇文章中我将给大家分享几种常用的技术，包括分离锁、并行数据结构、保护数据而非代码、缩小锁的作用范围，这几">
+  
+    <link rel="alternative" href="/atom.xml" title="Abners" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Abners</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术共享</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.abners.wang">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-java/java锁性能改善" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/03/31/java/java锁性能改善/" class="article-date">
+  <time datetime="2015-03-31T08:03:00.000Z" itemprop="datePublished">2015-03-31</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术翻译/">技术翻译</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      改善Java中锁的性能
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文由伯乐在线<a href="http://group.jobbole.com/category/feedback/trans-team/" target="_blank" rel="noopener">唐尤华</a> 校稿，翻译自 <a href="http://www.javacodegeeks.com/2015/01/improving-lock-performance-in-java.html" target="_blank" rel="noopener"> www.javacodegeeks.com</a> </p>
+<p>两个月前向Plumbr公司引进线程死锁的检测之后，我们开始收到一些类似于这样的询问：“棒极了！现在我知道造成程序出现性能问题的原因了，但是接下来该怎么做呢？”</p>
+<p>我们努力为自己的产品所遇到的问题思考解决办法，但在这篇文章中我将给大家分享几种常用的技术，包括分离锁、并行数据结构、保护数据而非代码、缩小锁的作用范围，这几种技术可以使我们不使用任何工具来检测死锁。<br><a id="more"></a><br>我们努力为自己的产品所遇到的问题思考解决办法，但在这篇文章中我将给大家分享几种常用的技术，包括分离锁、并行数据结构、保护数据而非代码、缩小锁的作用范围，这几种技术可以使我们不使用任何工具来检测死锁。</p>
+<p>锁不是问题的根源，锁之间的竞争才是</p>
+<p>通常在多线程的代码中遇到性能方面的问题时，一般都会抱怨是锁的问题。毕竟锁会降低程序的运行速度和其较低的扩展性是众所周知的。因此，如果带着这种“常识”开始优化代码，其结果很有可能是在之后会出现讨人厌的并发问题。</p>
+<p>因此，明白竞争锁和非竞争锁的不同是非常重要的。当一个线程试图进入 另一个线程正在执行的同步块或方法时会触发锁竞争。该线程会被强制进入等待状态，直到第一个线程执行完同步块并且已经释放了监视器。当同一时间只有一个线 程尝试执行同步的代码区域时，锁会保持非竞争的状态。</p>
+<p>事实上，在非竞争的情况下和大多数的应用中，JVM已经对同步进行了优化。非竞争锁在执行过程中不会带来任何额外的开销。因此，你不应该因为性能问题抱怨锁，应该抱怨的是锁的竞争。当有了这个认识之后，让我们来看下能做些什么，以降低竞争的可能性或减少竞争的持续时间。</p>
+<h3 id="保护数据而非代码"><a href="#保护数据而非代码" class="headerlink" title="保护数据而非代码"></a>保护数据而非代码</h3><p>解决线程安全问题的一个快速的方法就是对整个方法的可访问性加锁。例如下面这个例子，试图通过这种方法来建立一个在线扑克游戏服务器：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GameServer</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> Map&lt;&lt;String, List&lt;Player&gt;&gt; tables = <span class="keyword">new</span> HashMap&lt;String, List&lt;Player&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(Player player, Table table)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (player.getAccountBalance() &gt; table.getLimit()) &#123;</span><br><span class="line">      List&lt;Player&gt; tablePlayers = tables.get(table.getId());</span><br><span class="line">      <span class="keyword">if</span> (tablePlayers.size() &lt; <span class="number">9</span>) &#123;</span><br><span class="line">        tablePlayers.add(player);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">leave</span><span class="params">(Player player, Table table)</span> </span>&#123;<span class="comment">/*body skipped for brevity*/</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">createTable</span><span class="params">()</span> </span>&#123;<span class="comment">/*body skipped for brevity*/</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">destroyTable</span><span class="params">(Table table)</span> </span>&#123;<span class="comment">/*body skipped for brevity*/</span>&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>作者的意图是好的——当一个新的玩家加入牌桌 时，必须确保牌桌上的玩家个数不会超过牌桌可以容纳的玩家总个数9。</p>
+<p>但是这种解决办法事实上无论何时都要对玩家进入牌桌进行控制——即使是在服务器的访问量较小的时候也是这样，那些等 待锁释放的线程注定会频繁的触发系统的竞争事件。包含对账户余额和牌桌限制检查的锁定块很可能大幅提高调用操作的开销，而这无疑会增加竞争的可能性和持续 时间。</p>
+<p>解决的第一步就是确保我们保护的是数据，而不是从方法声明移到方法体中的那段同步声明。对于上面那个简单的例子来说，可能改变不大。但是我们要站在整个游戏服务的接口之上来考虑，而不是单单的一个join()方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GameServer</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> Map&lt;String, List&lt;Player&gt;&gt; tables = <span class="keyword">new</span> HashMap&lt;String, List&lt;Player&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(Player player, Table table)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (tables) &#123;</span><br><span class="line">      <span class="keyword">if</span> (player.getAccountBalance() &gt; table.getLimit()) &#123;</span><br><span class="line">        List&lt;Player&gt; tablePlayers = tables.get(table.getId());</span><br><span class="line">        <span class="keyword">if</span> (tablePlayers.size() &lt; <span class="number">9</span>) &#123;</span><br><span class="line">          tablePlayers.add(player);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">leave</span><span class="params">(Player player, Table table)</span> </span>&#123;<span class="comment">/* body skipped for brevity */</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createTable</span><span class="params">()</span> </span>&#123;<span class="comment">/* body skipped for brevity */</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroyTable</span><span class="params">(Table table)</span> </span>&#123;<span class="comment">/* body skipped for brevity */</span>&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>原本可能只是一个小小的改变，影响的可是整个类的行为方式。玩家无论何时加入牌桌，先前的同步方法都会对整个GameServer实例加锁，进而会与那些同时试图离开牌桌的玩家产生竞争。将锁从方法声明移到方法体中会延迟锁的加载，进而降低了锁竞争的可能性。</p>
+<h3 id="缩小锁的作用范围"><a href="#缩小锁的作用范围" class="headerlink" title="缩小锁的作用范围"></a>缩小锁的作用范围</h3><p>现在，当确信了需要保护的是数据而非程序后，我们应该确保我们只在必要的地方加锁——例如当上面的代码被重构之后：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GameServer</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> Map&lt;String, List&lt;Player&gt;&gt; tables = <span class="keyword">new</span> HashMap&lt;String, List&lt;Player&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(Player player, Table table)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (player.getAccountBalance() &gt; table.getLimit()) &#123;</span><br><span class="line">      <span class="keyword">synchronized</span> (tables) &#123;</span><br><span class="line">        List&lt;Player&gt; tablePlayers = tables.get(table.getId());</span><br><span class="line">        <span class="keyword">if</span> (tablePlayers.size() &lt; <span class="number">9</span>) &#123;</span><br><span class="line">          tablePlayers.add(player);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//other methods skipped for brevity</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样那段包含对玩家账号余额检测（可能引发IO操作）的可能引起费时操作的代码，被移到了锁控制的范围之外。注意，现在锁仅仅被用来防止玩家人数超过桌子可容纳的人数，对账户余额的检查不再是该保护措施的一部分了。</p>
+<h3 id="分离锁"><a href="#分离锁" class="headerlink" title="分离锁"></a>分离锁</h3><p>你可以从上面例子最后一行代码清楚的看到：整个数据结构是由相同的锁保护着。考虑到在这一种数据结构中可能会有数以千计的牌桌，而我们必须保护任何一张牌桌的人数不超过容量，在这样的情况下仍然会有很高的风险出现竞争事件。</p>
+<p>关于这个有一个简单的办法，就是对每一张牌桌引入分离锁，如下面这个例子所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GameServer</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> Map&lt;String, List&lt;Player&gt;&gt; tables = <span class="keyword">new</span> HashMap&lt;String, List&lt;Player&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(Player player, Table table)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (player.getAccountBalance() &gt; table.getLimit()) &#123;</span><br><span class="line">      List&lt;Player&gt; tablePlayers = tables.get(table.getId());</span><br><span class="line">      <span class="keyword">synchronized</span> (tablePlayers) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tablePlayers.size() &lt; <span class="number">9</span>) &#123;</span><br><span class="line">          tablePlayers.add(player);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//other methods skipped for brevity</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，我们只对单一牌桌的可访问性进行同步而不是所有的牌桌，这样就显著降低了出现锁竞争的可能性。举一个具体的例子，现在在我们的数据结构中有100个牌桌的实例，那么现在发生竞争的可能性就会比之前小100倍。</p>
+<h3 id="使用线程安全的数据结构"><a href="#使用线程安全的数据结构" class="headerlink" title="使用线程安全的数据结构"></a>使用线程安全的数据结构</h3><p>另一个可以改善的地方就是抛弃传统的单线程数据结构，改用被明确设计为线程安全的数据结构。例如，当采用ConcurrentHashMap来储存你的牌桌实例时，代码可能像下面这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GameServer</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> Map&lt;String, List&lt;Player&gt;&gt; tables = <span class="keyword">new</span> ConcurrentHashMap&lt;String, List&lt;Player&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">join</span><span class="params">(Player player, Table table)</span> </span>&#123;<span class="comment">/*Method body skipped for brevity*/</span>&#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">leave</span><span class="params">(Player player, Table table)</span> </span>&#123;<span class="comment">/*Method body skipped for brevity*/</span>&#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">createTable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Table table = <span class="keyword">new</span> Table();</span><br><span class="line">    tables.put(table.getId(), table);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">destroyTable</span><span class="params">(Table table)</span> </span>&#123;</span><br><span class="line">    tables.remove(table.getId());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在join()和leave()方法内部的同步块仍然和先前的例子一样，因为我们要保证单个牌桌数据的完整性。ConcurrentHashMap 在这点上并没有任何帮助。但我们仍然会在increateTable()和destoryTable()方法中使用ConcurrentHashMap创建和销毁新的牌桌，所有这些操作对于ConcurrentHashMap来说是完全同步的，其允许我们以并行的方式添加或减少牌桌的数量。</p>
+<h3 id="其他一些建议和技巧"><a href="#其他一些建议和技巧" class="headerlink" title="其他一些建议和技巧"></a>其他一些建议和技巧</h3><ul>
+<li>降低锁的可见度。在上面的例子中，锁被声明为public（对外可见），这可能会使得一些别有用心的人通过在你精心设计的监视器上加锁来破坏你的工作。</li>
+<li>通过查看java.util.concurrent.locks 的API来看一下 有没有其它已经实现的锁策略，使用其改进上面的解决方案。</li>
+<li>使用原子操作。在上面正在使用的简单递增计数器实际上并不要求加锁。上面的例子中更适合使用 AtomicInteger代替Integer作为计数器。</li>
+<li>最后一点，无论你是否正在使用Plumber的自动死锁检测解决方案，还是手动从线程转储获得解决办法的信息，都希望这篇文章可以为你解决锁竞争的问题带来帮助。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.abners.wang/2015/03/31/java/java锁性能改善/" data-id="cjf9cqopa001d0yfy52h8qcow" class="article-share-link" data-share="baidu" data-title="改善Java中锁的性能">Share</a>
+      
+
+      
+        <a href="http://blog.abners.wang/2015/03/31/java/java锁性能改善/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多线程/">多线程</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/07/14/redis/ten-redis-suggesstion/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          10 个 Redis 建议/技巧
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/09/java/array-to-list-java/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">把Java数组转换为List时的注意事项</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2015/03/31/java/java锁性能改善/" data-title="改善Java中锁的性能" data-url="http://blog.abners.wang/2015/03/31/java/java锁性能改善/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/原创/">原创</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工作/">工作</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术日志/">技术日志</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术翻译/">技术翻译</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/转载/">转载</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDE/">IDE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/">html</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java7/">java7</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/list/">list</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/">mongodb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多线程/">多线程</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/容器/">容器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工作/">工作</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/总结/">总结</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/类加载机制/">类加载机制</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/IDE/" style="font-size: 10px;">IDE</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/idea/" style="font-size: 10px;">idea</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/java7/" style="font-size: 10px;">java7</a> <a href="/tags/list/" style="font-size: 10px;">list</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/多线程/" style="font-size: 13.33px;">多线程</a> <a href="/tags/容器/" style="font-size: 10px;">容器</a> <a href="/tags/工作/" style="font-size: 10px;">工作</a> <a href="/tags/总结/" style="font-size: 10px;">总结</a> <a href="/tags/数据库/" style="font-size: 16.67px;">数据库</a> <a href="/tags/正则表达式/" style="font-size: 10px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/类加载机制/" style="font-size: 13.33px;">类加载机制</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/12/08/database/mysql/mysql索引原理/">mysql 索引原理及添加索引的原理</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/19/database/mongodb/mongodbid/">mongodb文档id生成策略</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/14/ide/idea使用小结/">idea使用小结</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/11/algorithm/NthDigit/">正整数序列求第n个数字</a>
+          </li>
+        
+          <li>
+            <a href="/2016/07/02/interview/面试总结/">面试杂谈</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Links</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://arvinxiang.com" target="_blank">主题作者</a>
+          </li>
+        
+          <li>
+            <a href="http://reqianduan.com" target="_blank">热前端</a>
+          </li>
+        
+          <li>
+            <a href="http://yuancheng.work" target="_blank">远程.work</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 abners<br>
+      Powered by <a href="//hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="totop"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"reqianduan"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

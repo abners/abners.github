@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>把Java数组转换为List时的注意事项 | Abners</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本文由伯乐在线唐尤华 校稿，翻译自 mlangc不幸的是并不是每件事都尽如人意。举个例子，现在将一个Java数组转换为List。当然，我们可以使用Arrays.toList方法，但是如果没有慎重思考就随便使用几乎肯定会产生令人讨厌的意外。考虑完下面这段程序并预测其输出你就明白我的意思了：">
+<meta name="keywords" content="list,java7,java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="把Java数组转换为List时的注意事项">
+<meta property="og:url" content="http://blog.abners.wang/2015/02/09/java/array-to-list-java/index.html">
+<meta property="og:site_name" content="Abners">
+<meta property="og:description" content="本文由伯乐在线唐尤华 校稿，翻译自 mlangc不幸的是并不是每件事都尽如人意。举个例子，现在将一个Java数组转换为List。当然，我们可以使用Arrays.toList方法，但是如果没有慎重思考就随便使用几乎肯定会产生令人讨厌的意外。考虑完下面这段程序并预测其输出你就明白我的意思了：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-15T09:18:02.744Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="把Java数组转换为List时的注意事项">
+<meta name="twitter:description" content="本文由伯乐在线唐尤华 校稿，翻译自 mlangc不幸的是并不是每件事都尽如人意。举个例子，现在将一个Java数组转换为List。当然，我们可以使用Arrays.toList方法，但是如果没有慎重思考就随便使用几乎肯定会产生令人讨厌的意外。考虑完下面这段程序并预测其输出你就明白我的意思了：">
+  
+    <link rel="alternative" href="/atom.xml" title="Abners" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Abners</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术共享</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.abners.wang">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-java/array-to-list-java" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/02/09/java/array-to-list-java/" class="article-date">
+  <time datetime="2015-02-09T07:58:00.000Z" itemprop="datePublished">2015-02-09</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术翻译/">技术翻译</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      把Java数组转换为List时的注意事项
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文由伯乐在线<a href="http://group.jobbole.com/category/feedback/trans-team/" target="_blank" rel="noopener">唐尤华</a> 校稿，翻译自 <a href="https://mlangc.wordpress.com/2010/05/01/be-carefull-when-converting-java-arrays-to-lists/" target="_blank" rel="noopener">mlangc</a><br>不幸的是并不是每件事都尽如人意。举个例子，现在将一个Java数组转换为List。当然，我们可以使用Arrays.toList方法，但是如果没有慎重思考就随便使用几乎肯定会产生令人讨厌的意外。考虑完下面这段程序并预测其输出你就明白我的意思了：<br><a id="more"></a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.wordpress.mlangc.arrays;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArraysToList</span> </span></span><br><span class="line"><span class="class"></span>&#123; </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">final</span> String[] args)</span> </span></span><br><span class="line"><span class="function">	</span>&#123; </span><br><span class="line">		System.out.println( </span><br><span class="line">		Arrays.asList(<span class="keyword">new</span> String[] &#123; <span class="string">"a"</span>, <span class="string">"b"</span>&#125;));</span><br><span class="line"></span><br><span class="line">		System.out.println(</span><br><span class="line">				Arrays.asList(<span class="keyword">new</span> Integer[] &#123; <span class="number">1</span>, <span class="number">2</span> &#125;));</span><br><span class="line"></span><br><span class="line">		System.out.println(</span><br><span class="line">				Arrays.asList(<span class="keyword">new</span> <span class="keyword">int</span>[] &#123; <span class="number">1</span>, <span class="number">2</span> &#125;));</span><br><span class="line"></span><br><span class="line">		System.out.println(</span><br><span class="line">				Arrays.asList(<span class="keyword">new</span> String[] &#123; <span class="string">"a"</span>, <span class="string">"b"</span> &#125;, <span class="string">"c"</span>));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于Javadoc对Arrays.asList的说明相当模糊，对你来说预测出程序的运行结果可能有点困难，下面我们来一步步的揭晓答案：</p>
+<ul>
+<li>第9行就像我们根据API所预测的那样在我们的控制台输出了“[a,b]”，这正是我们乐意看到的。</li>
+<li>第12行也一样如预期那样输出了“[1,2]”。</li>
+<li>第15行就不同了，当然这里不是说15与12的不同，而是一个是int另一个是Integer，因此在我们的控制台打印出了类似这样的结果“[[I@39172e08]”，这就不再如预期那样了。我们得到一个包含数组中标识每个元素唯一性的地址串的list，而不是包含两个Integer对象的list。</li>
+</ul>
+<p>看到上面的结果后，对于第18行输出的类似“[[Ljava.lang.String;@20cf2c80, c]”这样的结果就不会感到惊奇了。<br>但是发生了什么呢？前两个打印语句与我们预期的结果相同，因Java语言规范规定了调用一个声明为foo(T… t)的方法，比如foo(new T[]{bar,baz})等同于foo(bar,baz)这样的调用。在Arrays.asList方法中T是参数类型，因此它必须为一个Object 类型，但是int不是，而int[]却是。这就是为什么第16行的声明等同于： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Arrays.asList(<span class="keyword">new</span> Object[] &#123; <span class="keyword">new</span> <span class="keyword">int</span>[] &#123; <span class="number">1</span>, <span class="number">2</span> &#125; &#125;)</span><br></pre></td></tr></table></figure>
+<p>最后也是非常重要的一点，在第19行的声明从一开始就产生了调用问题。我们告诉编译器我们需要一个包含String数组和字符串的list，正如我们预期的那样我们得到了我们想要的东西。<br>到现在为止解释了这么多，但是我们还可以从中学到更多的东西：问题的真正来源并不是可变参数设计的很糟糕；相反的我认为这个设计很好。关于这个问题在Effective Java2第 42项规范中已经解释地很清楚了，Arrays.asList违反了该项规范，事实上Arrays.asList作为一个反面教材，告诉了我们在使用Java的可变参数设计API时为什么要非常小心。在这里我不会再重复那篇文章里的回答，但是你自己确实需要亲自去读一下它，但是考虑到完整性我必须指出 上面有问题的声明在使用Java1.4的编译器下编译的时候就会报错，这是相当好的。现在我们仍然会使用Arrays.asList，但是为了安全要求我 们知道所面临的问题的复杂性。下面是在将数组转换为lists的时候我们需要遵循的规则，做到这些可以确保没有任何意外的情况发生：</p>
+<ul>
+<li>如果你要将一个数组转换为list时最好将其转换为一个string，使用Arrays.toString代替上面的方法吧。即使对于基本类型的数组该方法也不会出现任何问题。</li>
+<li>如果你打算将一个基本类型的数组转换为所对应的封装类型的list，使用Apache Commons Lang吧，关于这个可能你很早就在项目中使用过了，类似下面这样使用ArrayUtils.toObject： List list = Arrays.asList(ArrayUtils.toObject(new int[] { 1, 2 }));</li>
+<li>请注意：一般情况下推荐使用原始数据类型数组而不是装箱后的原始数据类型列表。 如果你打算将一个引用类型的数组转换为list，可以直接使用Arrays.asList： List list = Arrays.asList(new String[] { “a”, “b” });</li>
+</ul>
+<p>不要忘了告诉和你一起工作的人以确保他们不和你犯同样的错误。当然，你也可以选择仅仅记住那些使用Arrays.asList方法时可能出现问题的地方，并使用普通的for循环来代替，但是那会使你的代码很杂乱，还会带来性能方面的问题</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.abners.wang/2015/02/09/java/array-to-list-java/" data-id="cjf9cqoot000x0yfytpbjbqbb" class="article-share-link" data-share="baidu" data-title="把Java数组转换为List时的注意事项">Share</a>
+      
+
+      
+        <a href="http://blog.abners.wang/2015/02/09/java/array-to-list-java/#ds-thread" class="article-comment-link">Comments</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java7/">java7</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/list/">list</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/03/31/java/java锁性能改善/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          改善Java中锁的性能
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/18/java/awaitTerminationshutdown/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">多线程awaitTermination和shutdown的使用问题</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="2015/02/09/java/array-to-list-java/" data-title="把Java数组转换为List时的注意事项" data-url="http://blog.abners.wang/2015/02/09/java/array-to-list-java/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/原创/">原创</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工作/">工作</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术日志/">技术日志</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术翻译/">技术翻译</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/转载/">转载</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDE/">IDE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/">html</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java7/">java7</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/list/">list</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mongodb/">mongodb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/多线程/">多线程</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/容器/">容器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/工作/">工作</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/总结/">总结</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/类加载机制/">类加载机制</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/IDE/" style="font-size: 10px;">IDE</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/idea/" style="font-size: 10px;">idea</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/java7/" style="font-size: 10px;">java7</a> <a href="/tags/list/" style="font-size: 10px;">list</a> <a href="/tags/mongodb/" style="font-size: 10px;">mongodb</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/多线程/" style="font-size: 13.33px;">多线程</a> <a href="/tags/容器/" style="font-size: 10px;">容器</a> <a href="/tags/工作/" style="font-size: 10px;">工作</a> <a href="/tags/总结/" style="font-size: 10px;">总结</a> <a href="/tags/数据库/" style="font-size: 16.67px;">数据库</a> <a href="/tags/正则表达式/" style="font-size: 10px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/类加载机制/" style="font-size: 13.33px;">类加载机制</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">July 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/12/08/database/mysql/mysql索引原理/">mysql 索引原理及添加索引的原理</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/19/database/mongodb/mongodbid/">mongodb文档id生成策略</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/14/ide/idea使用小结/">idea使用小结</a>
+          </li>
+        
+          <li>
+            <a href="/2016/12/11/algorithm/NthDigit/">正整数序列求第n个数字</a>
+          </li>
+        
+          <li>
+            <a href="/2016/07/02/interview/面试总结/">面试杂谈</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Links</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://arvinxiang.com" target="_blank">主题作者</a>
+          </li>
+        
+          <li>
+            <a href="http://reqianduan.com" target="_blank">热前端</a>
+          </li>
+        
+          <li>
+            <a href="http://yuancheng.work" target="_blank">远程.work</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 abners<br>
+      Powered by <a href="//hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="totop"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"reqianduan"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>
